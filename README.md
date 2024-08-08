@@ -10,6 +10,7 @@ Repositório com conteúdo aprendido no curso Docker Essencial do TechEduca (You
 * [volumes](#volumes)
 * [tmpfs](#tmpfs)
 * [redes no Docker](#redes-no-docker)
+* [docker compose](#docker-compose)
 
 ## conceitos básicos
 * imagem: é o passo a passo, como receita de bolo
@@ -20,6 +21,7 @@ Repositório com conteúdo aprendido no curso Docker Essencial do TechEduca (You
   	* -d: desatacha container criado;
   	* -e: passada para avisar que valores de variáveis serão definidos. Exemplo: -e NOME=Natalia;
   	* -v: avisar que será criado um volume;
+  	* --mount: cria volume;
   	* --build-arg: passar argumentos durante build.
 
 ## comandos básicos
@@ -204,7 +206,54 @@ Rede none: quando você quer subir um container e ele não está atrelado a nenh
 
 ```docker run -it --network nome-rede --name nome-container nome-imagem``` : comando para ativar rede e criar container na mesma hora.
 
+## docker compose
 
+Nem sempre o ```docker run``` é uma boa prática. Quando temos muitos containers relacionados com muitos argumentos, esse tipo de prática está suscetível ao erro. Para casos assim, usamos o ```docker compose```.
 
+	"Ferramenta do Docker utilizada para coordenar containers."
+ 
+É um arquivo ```docker-compose.yml``` que irá gerenciar os containers. Pode ser versionado e é menos suscetível a erros.
 
+Exemplo arquivo docker-compose.yml:
 
+	version: '3'
+	services:
+	  wordpress:
+	    image: wordpress:6.2.2
+	    container_name: meu_wordpress
+	    restart: always
+	    environment:
+	      - WORDPRESS_DB_HOST=db
+	      - WORDPRESS_DB_USER=natalia
+	      - WORDPRESS_DB_PASSWORD=123456
+	      - WORDPRESS_DB_NAME=wp-example
+	    ports:
+	      - 80:80
+	    volumes:
+	      - wordpress:/var/www/html
+	    networks:
+	      - meu-blog
+	  db:
+	    image: mysql:5.7
+	    container_name: meu_mysql
+	    restart: always
+	    environment:
+	      - MYSQL_DATABASE=wp-example
+	      - MYSQL_USER=natalia
+	      - MYSQL_PASSWORD=123456
+	      - MYSQL_ROOT_PASSWORD=123456
+	    volumes:
+	      - db:/var/lib/mysql
+	    ports:
+	      - 8080:8080
+	    networks:
+	      - meu-blog
+	networks:
+	  meu-blog:
+	    driver: bridge
+	volumes:
+	  wordpress:
+	  db:
+
+Para executar, é preciso ir na pasta onde está o arquivo compose e executar ```docker compose up```.
+     
