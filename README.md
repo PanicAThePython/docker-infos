@@ -188,6 +188,11 @@ Para salvar os dados na memoria ram, pois são perdidos quando o container é fi
 ## redes no Docker
 
 São três tipos: Bridge, Host e None.
+Passar diretamente o ip da máquina não é uma boa prática. É recomendado criar uma nova rede e rodar os containers necessários lá. Para isso, é usado a bridge. Quando a rede não é informada, ela é por padrão a bridge.
+
+Rede host: sempre que quiser inserir um container q usa a interface de rede do docker host, usar ela. Não precisa do mapeamento de porta que nem a bridge. Depois que rodar o container, se escrever apenas localhost no browser, vai mostrar o container... NÃO PRECISA DE PORTA!
+
+Rede none: quando você quer subir um container e ele não está atrelado a nenhuma interface de rede. Não possui endereço de ip, não tem acesso a internet. É usado em contexto isolado, como por exemplo processamento de dados.
 
 ```docker nework inspect bridge```;
 
