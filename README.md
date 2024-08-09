@@ -214,6 +214,8 @@ Nem sempre o ```docker run``` é uma boa prática. Quando temos muitos container
  
 É um arquivo ```docker-compose.yml``` que irá gerenciar os containers. Pode ser versionado e é menos suscetível a erros.
 
+Para listar composes: ```docker compose ps```.
+
 Exemplo arquivo docker-compose.yml:
 
 	version: '3'
@@ -233,6 +235,8 @@ Exemplo arquivo docker-compose.yml:
 	      - wordpress:/var/www/html
 	    networks:
 	      - meu-blog
+       	    depends_on:
+	      - db
 	  db:
 	    image: mysql:5.7
 	    container_name: meu_mysql
@@ -256,4 +260,89 @@ Exemplo arquivo docker-compose.yml:
 	  db:
 
 Para executar, é preciso ir na pasta onde está o arquivo compose e executar ```docker compose up```.
-     
+
+É uma boa prática deixar as variáveis num arquivo ```.env``` e, no lugar de ```environment```, colocar ```env_file``` e inserir o nome ```.env```.
+
+Exemplo:
+
+	env_file:
+	  - .env
+
+
+Outro exemplo de ```docker-compose.yml```:
+
+	version: '3'
+	services:
+	  mongo:
+	    build:
+	      context: .
+	      dockerfile: mongo.dockerfile
+	    container_name: mongo
+	    ports:
+	      - 27017:27017
+	    volumes:
+	      - mongo-volume:/data/db
+	    networks:
+	      - rede-aplicacao
+	  mongo-express:
+	    build:
+	      context: .
+	      dockerfile: mongo-express.dockerfile
+	    container_name: mongo-express
+	    ports:
+	      - 8081:8081
+	    networks:
+	      - rede-aplicacao
+	    depends_on:
+	      - mongo
+	  node1:
+	    build:
+	      context: .
+	      dockerfile: app.dockerfile
+	    container_name: node1
+	    ports:
+	      - 3001:3000
+	    networks:
+	      - rede-aplicacao
+	    depends_on:
+	      - mongo
+	  node2:
+	    build:
+	      context: .
+	      dockerfile: app.dockerfile
+	    container_name: node2
+	    ports:
+	      - 3002:3000
+	    networks:
+	      - rede-aplicacao
+	    depends_on:
+	      - mongo
+	  node3:
+	    build:
+	      context: .
+	      dockerfile: app.dockerfile
+	    container_name: node3
+	    ports:
+	      - 3003:3000
+	    networks:
+	      - rede-aplicacao
+	    depends_on:
+	      - mongo
+	  nginx:
+	    image: nginx:stable-alpine
+	    container_name: nginx
+	    ports:
+	      - 80:80
+	    networks:
+	      - rede-aplicacao
+	    volumes:
+	      - ./nginx.conf:/etc/nginx/nginx.conf
+	    depends_on:
+	      - node1
+	      - node2
+	      - node3
+	volumes:
+	  mongo-volume:
+	networks:
+	  rede-aplicacao:
+	    driver: bridge
